@@ -62,8 +62,8 @@ for site in site_names:
 for comp in compound_names:
     tbconcatted[comp] = pd.concat(tbconcatted[comp])
 
-for compound in compound_names:
-    print(tbconcatted[compound].head())
+# for compound in compound_names:
+    #print(tbconcatted[compound].head())
 
 all_compound_dfs = []
 for com in compound_names:
@@ -73,7 +73,7 @@ final_vocs_df = pd.concat(all_compound_dfs)
 
 final_vocs_df = final_vocs_df.sample(frac=1)
 
-print(final_vocs_df.head())
+# print(final_vocs_df.head())
 # so rn we have some overlapping values, but we've got all the data for 2021 AND 2022 in one huge yes-duplicates dataframe
 
 
@@ -93,7 +93,9 @@ fd = fd.dropna()
 
 fd = fd.sample(frac=1)
 
-print(fd.sort_values('date').head(20))
+fd.to_csv('final_dataset_with_vocs.py')
+
+# print(fd.sort_values('date').head(20))
 
 # print(len(fd))
 

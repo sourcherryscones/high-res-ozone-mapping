@@ -4,19 +4,25 @@ import geopandas as gpd
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.neural_network import MLPRegressor
 # models to try: linear regression, RF regression(sklearn.ensemble.RandomForestRegressor), 
 from sklearn import metrics
 from sklearn.preprocessing import MinMaxScaler
 from add_vcd_with_vocs import fd as final_dataset
+import plotly.express as px
+import xgboost
 
 
 final_dataset = final_dataset.dropna(subset=['ndvi'])
 
 
 useful_predictors = ['srad', 'tmax', 'vp','prcp', 'ndvi', 'vcd', 'mean_ozone', 'no2vcd', 'covcd', 'hchovcd']
-#final_dataset.plot(x='vcd', y='mean_ozone', style='o')
-    #final_dataset.plot(x='date', y='mean_ozone', secondary_y=c)
-#plt.show()
+
+final_dataset.plot(x='vcd', y='mean_ozone', style='o')
+
+final_dataset.plot(x='no2vcd', y='mean_ozone', style='x')
+# plt.show()
+
 corr_matrix = final_dataset[useful_predictors].corr()
 print("CORRELATION MATRIX:")
 print(corr_matrix)
@@ -27,7 +33,7 @@ sbd.plot(x='date', y='mean_ozone')
 plt.ylim(0,0.2)
 sbd.plot(x='date', y='vcd')
 plt.ylim(0,0.2)
-plt.show()
+# plt.show()
 
 X = final_dataset[['srad', 'tmax', 'vp', 'ndvi', 'vcd', 'prcp','no2vcd', 'covcd', 'hchovcd']]
 y = final_dataset[['mean_ozone']]
@@ -66,3 +72,42 @@ print("RFREG STATS =============================================================
 print('Mean Absolute Error:', metrics.mean_absolute_error(y_test, rf_y_preds))
 print('Mean Squared Error:', metrics.mean_squared_error(y_test, rf_y_preds))
 print('RMSE Squared Error:', metrics.root_mean_squared_error(y_test, rf_y_preds))
+print('R^2 value:', metrics.r2_score(y_test, rf_y_preds))
+
+
+
+mlpreg = MLPRegressor(solver='lbfgs', max_iter=2000, hidden_layer_sizes=(10,20,15))
+mlpreg.fit(X_train, y_train)
+mlp_y_preds = mlpreg.predict(X_test)
+print("MLPREG STATS ======================================================================================")
+print('Mean Absolute Error:', metrics.mean_absolute_error(y_test, mlp_y_preds))
+print('Mean Squared Error:', metrics.mean_squared_error(y_test, mlp_y_preds))
+print('RMSE Squared Error:', metrics.root_mean_squared_error(y_test, mlp_y_preds))
+print('R^2 value:', metrics.r2_score(y_test, mlp_y_preds))
+
+xgbreg = xgboost.XGBRegressor(n_estimators=1000, max_depth=7, eta=0.1,subsample=1.0)
+xgbreg.fit(X_train, y_train)
+xgbreg_preds = xgbreg.predict(X_test)
+print("MLPREG STATS ======================================================================================")
+print('Mean Absolute Error:', metrics.mean_absolute_error(y_test, xgbreg_preds))
+print('Mean Squared Error:', metrics.mean_squared_error(y_test, xgbreg_preds))
+print('RMSE Squared Error:', metrics.root_mean_squared_error(y_test, xgbreg_preds))
+print('R^2 value:', metrics.r2_score(y_test, xgbreg_preds))
+'''
+intraining_rf_preds = rfregr.predict(X_train)
+print("MLPREG STATS ======================================================================================")
+print('Mean Absolute Error:', metrics.mean_absolute_error(y_train, intraining_rf_preds))
+print('Mean Squared Error:', metrics.mean_squared_error(y_train, intraining_rf_preds))
+print("TRAINING MODEL R^2 (get wording from Christopher Sun & co.):", metrics.r2_score(y_train, intraining_rf_preds))
+'''
+
+# rf_residuals = rf_y_preds - y_test
+
+'''
+(3,4,4,3) yielded ~0.008
+(3,4,5,3) was same
+(10,10,10) yielded 0.007
+(10,15,10) yielded 0.0068
+(10,15,15) yielded 0.006197ish
+(10,20,15) yielded 0.00626046
+'''
